@@ -8,6 +8,7 @@ import { mount, shallow } from 'enzyme';
 import _ from 'lodash';
 
 import Monitors from './Monitors';
+import { getApplication, setApplication } from '../../../../services';
 import { historyMock, httpClientMock } from '../../../../../test/mocks';
 import { AlertingFakes, setupCoreStart } from '../../../../../test/utils/helpers';
 
@@ -414,5 +415,67 @@ describe('Monitors', () => {
 
     expect(getItemId).toHaveBeenCalled();
     expect(response).toBe('item_id-143534534345');
+  });
+});
+
+describe('Monitors resource sharing Access column', () => {
+  let originalApplication;
+
+  beforeEach(() => {
+    httpClientMock.get.mockResolvedValue({ ok: true, monitors: [], totalMonitors: 0 });
+    originalApplication = getApplication();
+  });
+
+  afterEach(() => setApplication(originalApplication));
+
+  const setResourceSharing = (resourceSharing) =>
+    setApplication({
+      ...originalApplication,
+      capabilities: { ...(originalApplication?.capabilities || {}), resourceSharing },
+    });
+
+  test('adds an Access column with a share-button marker when resource sharing is available', () => {
+    setResourceSharing({ enabled: true, availableTypes: 'monitor,workflow' });
+    const wrapper = getMountWrapper();
+    const accessColumn = wrapper
+      .instance()
+      .buildColumns()
+      .find((column) => column.name === 'Access');
+    expect(accessColumn).toBeDefined();
+
+    const marker = accessColumn.render('monitor-1', {
+      name: 'My Monitor',
+      monitor: { type: 'query_level_monitor' },
+    });
+    expect(marker.props['data-resource-id']).toBe('monitor-1');
+    expect(marker.props['data-resource-type']).toBe('monitor');
+    expect(marker.props['data-resource-name']).toBe('My Monitor');
+    expect(marker.props['data-resource-share-display']).toBe('icon');
+  });
+
+  test('uses the workflow resource type for composite (workflow) monitors', () => {
+    setResourceSharing({ enabled: true, availableTypes: 'monitor,workflow' });
+    const wrapper = getMountWrapper();
+    const accessColumn = wrapper
+      .instance()
+      .buildColumns()
+      .find((column) => column.name === 'Access');
+
+    const marker = accessColumn.render('workflow-1', {
+      name: 'My Workflow',
+      monitor: { type: 'workflow' },
+    });
+    expect(marker.props['data-resource-id']).toBe('workflow-1');
+    expect(marker.props['data-resource-type']).toBe('workflow');
+  });
+
+  test('does not add the Access column when resource sharing is unavailable', () => {
+    setResourceSharing(undefined);
+    const wrapper = getMountWrapper();
+    const accessColumn = wrapper
+      .instance()
+      .buildColumns()
+      .find((column) => column.name === 'Access');
+    expect(accessColumn).toBeUndefined();
   });
 });
