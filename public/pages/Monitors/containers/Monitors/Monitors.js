@@ -138,7 +138,7 @@ export default class Monitors extends Component {
               field: 'id',
               name: 'Access',
               sortable: false,
-              width: '50px',
+              width: '120px',
               render: (id, item) => {
                 const resourceType =
                   item.monitor?.type === 'workflow'
