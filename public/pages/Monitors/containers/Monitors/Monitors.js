@@ -129,12 +129,14 @@ export default class Monitors extends Component {
 
     return [
       ...staticColumns,
-      ...(isResourceSharingAvailable(MONITOR_RESOURCE_TYPE)
+      ...(isResourceSharingAvailable(MONITOR_RESOURCE_TYPE) ||
+      isResourceSharingAvailable(ALERTING_WORKFLOW_RESOURCE_TYPE)
         ? [
             {
               // Resource-sharing SPI marker column: the centralized Share
               // button is mounted here by security-dashboards-plugin when
-              // installed and resource sharing is enabled for monitors.
+              // installed and resource sharing is enabled for monitors or
+              // composite (workflow) monitors.
               field: 'id',
               name: 'Access',
               sortable: false,

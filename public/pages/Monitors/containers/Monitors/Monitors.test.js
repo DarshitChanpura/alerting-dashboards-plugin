@@ -478,4 +478,27 @@ describe('Monitors resource sharing Access column', () => {
       .find((column) => column.name === 'Access');
     expect(accessColumn).toBeUndefined();
   });
+
+  test('renders the Access column when only the workflow type is available', () => {
+    setResourceSharing({ enabled: true, availableTypes: 'workflow' });
+    const accessColumn = getMountWrapper()
+      .instance()
+      .buildColumns()
+      .find((column) => column.name === 'Access');
+    expect(accessColumn).toBeDefined();
+
+    // A composite (workflow) monitor row still gets a share-button marker.
+    const workflowMarker = accessColumn.render('workflow-1', {
+      name: 'My Workflow',
+      monitor: { type: 'workflow' },
+    });
+    expect(workflowMarker.props['data-resource-type']).toBe('workflow');
+
+    // A regular monitor row renders nothing, since the monitor type is not shared.
+    const monitorMarker = accessColumn.render('monitor-1', {
+      name: 'My Monitor',
+      monitor: { type: 'query_level_monitor' },
+    });
+    expect(monitorMarker).toBeNull();
+  });
 });

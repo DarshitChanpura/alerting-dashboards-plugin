@@ -120,7 +120,10 @@ export const isResourceSharingAvailable = (resourceType: string): boolean => {
   const resourceSharing = capabilities?.resourceSharing;
   if (!resourceSharing?.enabled) return false;
   const types: string = resourceSharing.availableTypes ?? '';
-  return types.split(',').includes(resourceType);
+  return types
+    .split(',')
+    .map((type) => type.trim())
+    .includes(resourceType);
 };
 
 export const getUseUpdatedUx = () => {

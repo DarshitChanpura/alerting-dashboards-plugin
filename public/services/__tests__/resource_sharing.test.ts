@@ -38,4 +38,10 @@ describe('isResourceSharingAvailable', () => {
     setResourceSharing({ enabled: true, availableTypes: 'monitor,workflow' });
     expect(isResourceSharingAvailable(ALERTING_WORKFLOW_RESOURCE_TYPE)).toBe(true);
   });
+
+  it('trims whitespace around availableTypes tokens', () => {
+    setResourceSharing({ enabled: true, availableTypes: 'monitor, workflow' });
+    expect(isResourceSharingAvailable(MONITOR_RESOURCE_TYPE)).toBe(true);
+    expect(isResourceSharingAvailable(ALERTING_WORKFLOW_RESOURCE_TYPE)).toBe(true);
+  });
 });
